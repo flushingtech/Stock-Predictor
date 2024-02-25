@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            padding: 8px;
+            margin: 8px 0;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Stock Predictor</h2>
+        <div>
+            <label for="symbol">Enter Stock Symbol:</label>
+            <input type="text" id="symbol" name="symbol">
+            <button onclick="predictStock()">Predict</button>
+        </div>
+        <div id="realtimeData">
+            <!-- Real-time data will be displayed here -->
+        </div>
+        <div id="historicalData">
+            <!-- Historical data will be displayed here -->
+        </div>
+        <div id="prediction">
+            <!-- Predicted closing price will be displayed here -->
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code to interact with the backend
+        function predictStock() {
+            // Get the stock symbol from the input field
+            var symbol = document.getElementById("symbol").value;
+
+            // Send a GET request to the backend with the stock symbol
+            fetch(`http://127.0.0.1:5000/predict?symbol=${symbol}`)
+            .then(response => response.json())
+            .then(data => {
+                // Display real-time data
+                document.getElementById("realtimeData").innerHTML = `
+                    <h3>Real-time Data:</h3>
+                    <p>Stock Symbol: ${data.symbol}</p>
+                    <p>Price: ${data.price}</p>
+                    <p>Change Percent: ${data.changePercent}</p>
+                `;
+
+                // Display predicted closing price
+                document.getElementById("prediction").innerHTML = `
+                    <h3>Predicted Closing Price for the Next Day:</h3>
+                    <p>${data.predictedPrice}</p>
+                `;
+            })
+            .catch(error => console.error('Error:', error));
+
+            // Send a GET request to fetch historical data
+            fetch(`http://127.0.0.1:5000/history?symbol=${symbol}`)
+            .then(response => response.json())
+            .then(data => {
+                // Display historical data
+                var historicalDataHtml = '<h3>Historical Data:</h3>';
+                data.forEach(item => {
+                    historicalDataHtml += `
+                        <p>Date: ${item.date}</p>
+                        <p>Open: ${item.open}</p>
+                        <p>High: ${item.high}</p>
+                        <p>Low: ${item.low}</p>
+                        <p>Close: ${item.close}</p>
+                        <p>Volume: ${item.volume}</p>
+                    `;
+                });
+                document.getElementById("historicalData").innerHTML = historicalDataHtml;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
